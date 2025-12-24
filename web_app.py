@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 
+from database import registrations_count
+from config import MAX_PLAYERS
+
 app = FastAPI()
 
 app.add_middleware(
@@ -16,7 +19,8 @@ DB = "nutsclub.db"
 def conn():
     return sqlite3.connect(DB)
 
-@app.get("/profile/{user_id}") 
+# ---------- PROFILE ----------
+@app.get("/profile/{user_id}")
 def profile(user_id: int):
     c = conn()
     cur = c.cursor()
@@ -29,6 +33,7 @@ def profile(user_id: int):
 
     return {"name": user[0], "points": user[1]}
 
+# ---------- LEADERBOARD ----------
 @app.get("/leaderboard")
 def leaderboard():
     c = conn()
@@ -38,6 +43,7 @@ def leaderboard():
     c.close()
     return [{"name": n, "points": p} for n, p in data]
 
+# ---------- GAMES ----------
 @app.get("/games")
 def games():
     c = conn()
@@ -52,13 +58,14 @@ def games():
             "id": game_id,
             "date": date,
             "title": title,
-            "count": count,
+            "registered": count,
             "max": MAX_PLAYERS
         })
 
     c.close()
     return result
-    
+
+# ---------- ROOT ----------
 @app.get("/")
 def root():
     return {
