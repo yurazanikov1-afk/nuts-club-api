@@ -42,10 +42,23 @@ def leaderboard():
 def games():
     c = conn()
     cur = c.cursor()
-    cur.execute("SELECT date, title FROM games")
-    data = cur.fetchall()
+    cur.execute("SELECT id, date, title FROM games")
+    rows = cur.fetchall()
+
+    result = []
+    for game_id, date, title in rows:
+        count = registrations_count(game_id)
+        result.append({
+            "id": game_id,
+            "date": date,
+            "title": title,
+            "count": count,
+            "max": MAX_PLAYERS
+        })
+
     c.close()
-    return [{"date": d, "title": t} for d, t in data]
+    return result
+    
 @app.get("/")
 def root():
     return {
